@@ -1,0 +1,5 @@
+# Exclude high-volume UDP I/O from mosh-server.
+# Keeps exec/bind/connect/etc, only silences send/recv.
+-a never,exit -F arch=b64 -F exe=/usr/bin/mosh-server -S sendto,recvfrom,sendmsg,recvmsg -k net_drop_mosh
+-a never,exit -F arch=b32 -F exe=/usr/bin/mosh-server -S sendto,recvfrom,sendmsg,recvmsg -k net_drop_mosh
+

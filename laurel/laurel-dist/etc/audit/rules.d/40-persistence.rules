@@ -1,0 +1,25 @@
+# 40-persistence.rules — systemd/cron/shell persistence
+
+# systemd units
+-a always,exit -F arch=b64 -F dir=/etc/systemd/system -F perm=wa -k svc_persist
+-a always,exit -F arch=b32 -F dir=/etc/systemd/system -F perm=wa -k svc_persist
+-a always,exit -F arch=b64 -F dir=/usr/lib/systemd/system -F perm=wa -k svc_persist
+-a always,exit -F arch=b32 -F dir=/usr/lib/systemd/system -F perm=wa -k svc_persist
+
+# cron
+-a always,exit -F arch=b64 -F dir=/etc/cron.d       -F perm=wa -k cron_persist
+-a always,exit -F arch=b32 -F dir=/etc/cron.d       -F perm=wa -k cron_persist
+-a always,exit -F arch=b64 -F dir=/etc/cron.daily   -F perm=wa -k cron_persist
+-a always,exit -F arch=b32 -F dir=/etc/cron.daily   -F perm=wa -k cron_persist
+-a always,exit -F arch=b64 -F dir=/etc/cron.hourly  -F perm=wa -k cron_persist
+-a always,exit -F arch=b32 -F dir=/etc/cron.hourly  -F perm=wa -k cron_persist
+-a always,exit -F arch=b64 -F dir=/etc/cron.weekly  -F perm=wa -k cron_persist
+-a always,exit -F arch=b32 -F dir=/etc/cron.weekly  -F perm=wa -k cron_persist
+-a always,exit -F arch=b64 -F dir=/etc/cron.monthly -F perm=wa -k cron_persist
+-a always,exit -F arch=b32 -F dir=/etc/cron.monthly -F perm=wa -k cron_persist
+
+# system-wide shell profiles
+-w /etc/profile         -p wa -k shell_persist
+-w /etc/profile.d       -p wa -k shell_persist
+-w /etc/bashrc          -p wa -k shell_persist
+-w /etc/bash.bashrc     -p wa -k shell_persist

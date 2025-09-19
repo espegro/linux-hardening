@@ -1,0 +1,25 @@
+# 35-network.rules — outbound and listening sockets (INET/INET6 only)
+
+# Outbound to IPv4/IPv6 only (drop AF_LOCAL, NETLINK, etc. by length filter a2)
+# sizeof(sockaddr_in)=16, sizeof(sockaddr_in6)=28 on x86_64
+
+# Users (AUID >= 1000)
+-a always,exit -F arch=b64 -S connect,sendto -F a2=16 -F auid>=1000 -F auid!=4294967295 -k net_user
+-a always,exit -F arch=b64 -S connect,sendto -F a2=28 -F auid>=1000 -F auid!=4294967295 -k net_user
+-a always,exit -F arch=b32 -S connect,sendto -F a2=16 -F auid>=1000 -F auid!=4294967295 -k net_user
+-a always,exit -F arch=b32 -S connect,sendto -F a2=28 -F auid>=1000 -F auid!=4294967295 -k net_user
+
+# Outbound by root (INET/INET6 only)
+-a always,exit -F arch=b64 -S connect,sendto -F a2=16 -F euid=0 -k net_root
+-a always,exit -F arch=b64 -S connect,sendto -F a2=28 -F euid=0 -k net_root
+-a always,exit -F arch=b32 -S connect,sendto -F a2=16 -F euid=0 -k net_root
+-a always,exit -F arch=b32 -S connect,sendto -F a2=28 -F euid=0 -k net_root
+
+# Processes opening listening sockets
+-a always,exit -F arch=b64 -S bind,listen -F auid>=1000 -F auid!=4294967295 -k net_bind
+-a always,exit -F arch=b32 -S bind,listen -F auid>=1000 -F auid!=4294967295 -k net_bind
+-a always,exit -F arch=b64 -S bind,listen -F euid=0 -k net_listen
+-a always,exit -F arch=b32 -S bind,listen -F euid=0 -k net_listen
+
+# Note: Accept/accept4 is provided per-profile (server vs interactive).
+

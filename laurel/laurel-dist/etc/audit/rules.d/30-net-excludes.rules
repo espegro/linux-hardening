@@ -1,0 +1,15 @@
+# 30-net-excludes.rules — surgical noise cuts for chatty daemons
+
+# Mosh UDP chatter (already observed noisy sendto)
+-a never,exit -F arch=b64 -S sendto -F exe=/usr/bin/mosh-server -k net_drop_mosh
+-a never,exit -F arch=b32 -S sendto -F exe=/usr/bin/mosh-server -k net_drop_mosh
+
+# sshd's local IPC/logging (connect/sendto to AF_LOCAL, already cut by a2=16/28 filter)
+# Keep as safety net in case a2 filter is removed later.
+-a never,exit -F arch=b64 -S connect,sendto -F exe=/usr/sbin/sshd -k net_drop_sshd_local
+-a never,exit -F arch=b32 -S connect,sendto -F exe=/usr/sbin/sshd -k net_drop_sshd_local
+
+# systemd-machined local chatter seen in logs
+-a never,exit -F arch=b64 -S sendto -F exe=/usr/lib/systemd/systemd-machined -k net_drop_machined
+-a never,exit -F arch=b32 -S sendto -F exe=/usr/lib/systemd/systemd-machined -k net_drop_machined
+

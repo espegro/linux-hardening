@@ -1,0 +1,5 @@
+# Explicit sudo/su tracking
+-a always,exit -F arch=b64 -S execve,execveat -F exe=/usr/bin/sudo -k sudo_exec
+-a always,exit -F arch=b64 -S execve,execveat -F exe=/usr/bin/su   -k su_exec
+-a always,exit -F arch=b32 -S execve,execveat -F exe=/usr/bin/sudo -k sudo_exec
+-a always,exit -F arch=b32 -S execve,execveat -F exe=/usr/bin/su   -k su_exec

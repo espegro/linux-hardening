@@ -1,0 +1,10 @@
+# 00-control.rules — audit framework control
+# Increase backlog to handle bursts
+-b 8192
+# On log failure, panic (1) or just print (0). Consider 0 if too strict.
+-f 1
+# Do NOT use -D here with augenrules unless you know you need to flush first.
+# -D
+
+# Enable auditing (mutable). Switch to -e 2 to make rules immutable until reboot.
+-e 1

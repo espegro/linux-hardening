@@ -1,0 +1,9 @@
+# 99-tuning.rules — host-specific noise suppression (examples)
+
+# Example: drop failed openat noise for bash / whoami hwcaps probing
+# -a never,exit -F arch=b64 -S openat -F exe=/usr/bin/bash -F success=0 -k file_drop
+# -a never,exit -F arch=b64 -S openat -F exe=/usr/bin/whoami -F success=0 -k file_drop
+
+# Example: mark curl/dnf networking for Laurel to drop (keep first-per-process)
+# -a always,exit -F arch=b64 -S connect -F exe=/usr/bin/curl -k net_drop
+# -a always,exit -F arch=b64 -S connect -F exe=/usr/bin/dnf  -k net_drop

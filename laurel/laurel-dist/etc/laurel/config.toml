@@ -1,0 +1,101 @@
+# === Laurel configuration for multi-user RHEL9 boxes =========================
+# Goals:
+# - Keep Laurel static; do noise tuning with audit rules (keys).
+# - Translate users and network addresses (IPs/ports) for jq/SIEM readability.
+# - Generic drop policy: any audit event with key "*_drop" or "drop".
+# - Keep the first event per process to preserve process tree tracking.
+# ============================================================================
+
+# Log directory and drop-privs target
+directory = "/var/log/laurel"
+user = "_laurel"
+
+# Status reports to syslog (0 = disabled)
+statusreport-period = 0
+
+# Input: read audit events from stdin (auditd plugin)
+input = "stdin"
+
+[auditlog]
+# JSONL output file (use "-" to send to stdout/pipeline)
+file = "audit.log"
+# Rotate at ~5 MiB; keep 10 generations
+size = 5000000
+generations = 10
+# Grant read rights via ACLs (uncomment as needed)
+# read-users = [ "splunk" ]
+
+
+# Debug parse errors (enable temporarily if you tune rules and want strictness)
+# [debug.parse-error-log]
+# file = "parse-error.log"
+# size = 1000000
+# generations = 3
+
+# Filtered events sink (use with filter-action="log" while testing)
+# [filterlog]
+# file = "filtered.log"
+# size = 1000000
+# generations = 3
+# read-users = [ "splunk" ]
+
+[state]
+# On-disk state for process correlation / restarts
+file = "state"
+generations = 0
+max-age = 60
+
+[transform]
+# Output exec arguments as an array (ARGV) and optionally as a single string.
+# Keeping both helps grep and human reading; comment "string" if you want smaller logs.
+execve-argv = [ "array", "string" ]
+# execve-argv-limit-bytes = 10000   # trim huge argv bursts (optional)
+
+[translate]
+# Human-friendly translations:
+#  - universal: syscall/arch and sockaddr → AF, IP, PORT, etc.
+#  - user-db:   UID/GID → names
+#  - drop-raw:  hide numeric/raw fields when translated (set false to keep both)
+universal = true
+user-db = true
+drop-raw = true
+
+[enrich]
+# Add helpful context for analysis and correlation
+pid = true
+execve-env = [ "LD_PRELOAD", "LD_LIBRARY_PATH" ]
+container = true
+container_info = false
+systemd = true
+script = true
+user-groups = true
+# prefix = "enriched_"   # add a prefix to enrichment fields if your SIEM needs it
+
+[label-process]
+# Keep labels minimal/static; do most tuning in audit rules.
+# You can still add stable labels here if useful, e.g.:
+# label-exe."(^|/)(ssh)$" = "ssh"
+# propagate-labels = [ "ssh" ]
+
+[filter]
+# Keep Laurel static and steer noise with audit *keys* only.
+# Generic: drop any event whose key is exactly "drop" or ends with "_drop".
+# This lets you adjust støy entirely via audit rules (e.g. -k net_drop, file_drop).
+filter-raw-lines = [
+  '(^|[[:space:]])key="[^"]*_drop"([[:space:]]|$)',
+  '(^|[[:space:]])key="drop"([[:space:]]|$)'
+]
+
+# Do not silently discard unkeyed events (we key the rules we want to control)
+filter-null-keys = false
+
+# Socket-level filtering is left to audit rules; examples (leave commented):
+# filter-sockaddr = [ "127.0.0.1", "*:111" ]
+# NOTE: no port ranges here; prefer audit rules + keys for flexible control.
+
+# Preserve first event of each process even if later events get filtered
+keep-first-per-process = true
+
+# What to do with filtered events: "drop" or "log" (to [filterlog])
+filter-action = "drop"
+

@@ -1,0 +1,21 @@
+## --- Drop daemon-only UID/GID flips (keep only human sessions) ---
+## Reason: pmdaproc & andre system-daemons har AUID unset (4294967295)
+-a always,exit -F arch=b64 -S setuid,setgid,setreuid,setregid,setfsuid,setfsgid,setresuid,setresgid -F auid>=1000 -F auid!=4294967295 -k id_change
+-a always,exit -F arch=b32 -S setuid,setgid,setreuid,setregid,setfsuid,setfsgid,setresuid,setresgid -F auid>=1000 -F auid!=4294967295 -k id_change
+
+## Optional: Silence PCP’s pmdaproc completely
+## -a never,exit -F arch=b64 -S setreuid,setregid,setresuid,setresgid -F subj_type=pcp_pmcd_t
+## -a never,exit -F arch=b32 -S setreuid,setregid,setresuid,setresgid -F subj_type=pcp_pmcd_t
+
+## --- Drop prlimit64 reads (a2==0 means "new_limit" is NULL → just querying) ---
+-a never,exit -F arch=b64 -S prlimit64 -F a2=0
+-a never,exit -F arch=b32 -S prlimit64 -F a2=0
+
+## Keep real prlimit64 changes from human users (new_limit != NULL)
+-a always,exit -F arch=b64 -S prlimit64 -F a2!=0 -F auid>=1000 -F auid!=4294967295 -k debug_evade
+-a always,exit -F arch=b32 -S prlimit64 -F a2!=0 -F auid>=1000 -F auid!=4294967295 -k debug_evade
+
+## --- Keep execs from human users (these are the useful ones you saw) ---
+# -a always,exit -F arch=b64 -S execve -F auid>=1000 -F auid!=4294967295 -k exec_user
+# -a always,exit -F arch=b32 -S execve -F auid>=1000 -F auid!=4294967295 -k exec_user
+

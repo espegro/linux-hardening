@@ -1,0 +1,12 @@
+# 70-denied-file-ops.rules — file access denials
+
+# Generic denied file ops: only for real user sessions (cut PAM/sshd/SSSD noise)
+-a always,exit -F arch=b64 -S open,openat,creat,truncate,ftruncate,unlink,unlinkat,rename,renameat -F success=0 -F auid>=1000 -F auid!=4294967295 -k file_denied
+-a always,exit -F arch=b32 -S open,openat,creat,truncate,ftruncate,unlink,unlinkat,rename,renameat -F success=0 -F auid>=1000 -F auid!=4294967295 -k file_denied
+
+# NFS/automount hotpaths: keep even for system processes (you asked for this explicitly)
+-a always,exit -F arch=b64 -S open,openat,rename,renameat,unlink,unlinkat,creat -F dir=/uio  -F success=0 -k nfs_denied
+-a always,exit -F arch=b32 -S open,openat,rename,renameat,unlink,unlinkat,creat -F dir=/uio  -F success=0 -k nfs_denied
+-a always,exit -F arch=b64 -S open,openat,rename,renameat,unlink,unlinkat,creat -F dir=/usit -F success=0 -k nfs_denied
+-a always,exit -F arch=b32 -S open,openat,rename,renameat,unlink,unlinkat,creat -F dir=/usit -F success=0 -k nfs_denied
+

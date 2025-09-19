@@ -1,0 +1,5 @@
+# 50-profile-interactive.rules — extras for interactive/login nodes
+
+# If this is a login node (sshd), you may want to log inbound accepts specifically:
+# -a always,exit -F arch=b64 -S accept,accept4 -F exe=/usr/sbin/sshd -k net_accept
+# -a always,exit -F arch=b32 -S accept            -F exe=/usr/sbin/sshd -k net_accept

@@ -1,0 +1,28 @@
+# 30-defense-evasion.rules — tampering and stealth
+
+# Audit/Laurel tampering
+-w /etc/audit/         -p wa -k auditd_tamper
+-w /etc/audit/rules.d/ -p wa -k auditd_tamper
+-w /etc/laurel/        -p wa -k laurel_tamper
+
+# SELinux policy changes
+-w /etc/selinux/ -p wa -k selinux_policy
+
+# Kernel module load/unload
+-a always,exit -F arch=b64 -S init_module,finit_module,delete_module -k kmod_changes
+-a always,exit -F arch=b32 -S init_module,delete_module -k kmod_changes
+
+# Capability and identity changes
+-a always,exit -F arch=b64 -S setuid,setresuid,setreuid,setfsuid,setgid,setresgid,setregid,setfsgid,capset -k id_change
+-a always,exit -F arch=b32 -S setuid,setresuid,setreuid,setfsuid,setgid,setresgid,setregid,setfsgid,capset -k id_change
+
+# Debug/limits evasion
+-a always,exit -F arch=b64 -S ptrace,prlimit64 -k debug_evade
+-a always,exit -F arch=b32 -S ptrace -k debug_evade
+
+# LD preload hijacking attempts
+-w /etc/ld.so.preload -p wa -k ld_preload
+
+# File capabilities changes via setcap utility (coarse but practical)
+-a always,exit -F arch=b64 -S execve,execveat -F exe=/usr/sbin/setcap -k file_caps
+-a always,exit -F arch=b32 -S execve,execveat -F exe=/usr/sbin/setcap -k file_caps
