@@ -1,12 +1,14 @@
-# 70-denied-file-ops.rules — file access denials
+# 70-denied-file-ops.rules — file access denials (noise-reduced)
 
-# Generic denied file ops: only for real user sessions (cut PAM/sshd/SSSD noise)
--a always,exit -F arch=b64 -S open,openat,creat,truncate,ftruncate,unlink,unlinkat,rename,renameat -F success=0 -F auid>=1000 -F auid!=4294967295 -k file_denied
--a always,exit -F arch=b32 -S open,openat,creat,truncate,ftruncate,unlink,unlinkat,rename,renameat -F success=0 -F auid>=1000 -F auid!=4294967295 -k file_denied
+# GENERIC USER-SPACE DENIALS (kun reelle «permission denied», ikke ENOENT-støy)
+-a always,exit -F arch=b64 -S open,openat,creat,truncate,ftruncate,unlink,unlinkat,rename,renameat -F exit=-EPERM  -F auid>=1000 -F auid!=4294967295 -k file_denied
+-a always,exit -F arch=b64 -S open,openat,creat,truncate,ftruncate,unlink,unlinkat,rename,renameat -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k file_denied
+-a always,exit -F arch=b32 -S open,openat,creat,truncate,ftruncate,unlink,unlinkat,rename,renameat -F exit=-EPERM  -F auid>=1000 -F auid!=4294967295 -k file_denied
+-a always,exit -F arch=b32 -S open,openat,creat,truncate,ftruncate,unlink,unlinkat,rename,renameat -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k file_denied
 
-# NFS/automount hotpaths: keep even for system processes (you asked for this explicitly)
+# NFS/AUTOMOUNT HOTPATHS (behold alle feil for /uio og /usit)
 -a always,exit -F arch=b64 -S open,openat,rename,renameat,unlink,unlinkat,creat -F dir=/uio  -F success=0 -k nfs_denied
--a always,exit -F arch=b32 -S open,openat,rename,renameat,unlink,unlinkat,creat -F dir=/uio  -F success=0 -k nfs_denied
 -a always,exit -F arch=b64 -S open,openat,rename,renameat,unlink,unlinkat,creat -F dir=/usit -F success=0 -k nfs_denied
+-a always,exit -F arch=b32 -S open,openat,rename,renameat,unlink,unlinkat,creat -F dir=/uio  -F success=0 -k nfs_denied
 -a always,exit -F arch=b32 -S open,openat,rename,renameat,unlink,unlinkat,creat -F dir=/usit -F success=0 -k nfs_denied
 
