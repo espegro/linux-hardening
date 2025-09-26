@@ -1,2 +1,0 @@
-# 75-nfs-denied.rules — failed file ops under global automount roots (/uio, /usit)
-# Capture only failures to reduce volume; adjust as needed.
